@@ -4,88 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JOSE SANCHEZ | IPTV Portfolio</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Montserrat:wght@300;400;700;800;900&display=swap" rel="stylesheet">
     
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://bundle.run/framer-motion@10.16.4"></script>
+    
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Montserrat:wght@300;400;700;800;900&display=swap');
-        
-        :root { --bg-color: #050505; }
-        body { background-color: var(--bg-color); color: #ffffff; font-family: 'Inter', sans-serif; overflow-x: hidden; margin: 0; }
-        
-        .font-montserrat { font-family: 'Montserrat', sans-serif; }
-        
-        /* Скроллбар */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.4); border-radius: 10px; }
-        
-        /* Эффект шума */
-        .noise-bg {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            pointer-events: none; z-index: 50; opacity: 0.05;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-        }
-
-        /* Анимации */
-        @keyframes breathGlow {
-            0%, 100% { opacity: 0.5; transform: scale(0.95); filter: blur(50px); }
-            50% { opacity: 0.9; transform: scale(1.05); filter: blur(60px); }
-        }
-        .animate-breath { animation: breathGlow 5s ease-in-out infinite; }
-
-        @keyframes driftMote {
-            0% { transform: translate(0, 0); opacity: 0; }
-            20% { opacity: 0.8; }
-            80% { opacity: 0.8; }
-            100% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
-        }
-        .dust-mote { animation: driftMote linear infinite; }
-
-        .preserve-3d { transform-style: preserve-3d; }
-
-        /* Spotlight для карточек */
-        .glass-card::before {
-            content: ""; position: absolute; inset: 0; border-radius: inherit;
-            background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.1), transparent 40%);
-            opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2;
-        }
-        .glass-card:hover::before { opacity: 1; }
-
-        /* Glitch эффект */
-        .glitch-wrapper:hover .glitch-text::before {
-            content: attr(data-text); position: absolute; top: 0; left: 3px; width: 100%; height: 100%;
-            text-shadow: -2px 0 #ff00c1; clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-            animation: glitch-anim 2s infinite linear alternate-reverse;
-        }
-        @keyframes glitch-anim {
-            0% { clip-path: polygon(0 2%, 100% 2%, 100% 5%, 0 5%); transform: translate(2px, -2px); }
-            100% { clip-path: polygon(0 44%, 100% 44%, 100% 44%, 0 44%); transform: translate(-1px, -1px); }
-        }
-    </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
+        // Маппинг библиотек для браузера (чтобы работало как твои import)
         const { useState, useEffect, useMemo } = React;
-        const { motion, AnimatePresence } = window.Motion; // Используем Motion из bundle.run
+        const { motion, AnimatePresence } = window.framerMotion;
+
+        // Иконка Globe из Lucide
+        const GlobeIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        );
 
         const App = () => {
+            // Инициализация базовых состояний интерфейса и позиции курсора
             const [lang, setLang] = useState('DE');
             const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
             const [cursorPos, setCursorPos] = useState({ x: -1000, y: -1000 });
+            const [isHoveringTitle, setIsHoveringTitle] = useState(false);
 
-            // Оптимизированные частицы (Dust motes)
+            // Мемоизация генерации пылинок (Dust motes)
             const dustMotes = useMemo(() => {
-                return [...Array(40)].map((_, i) => ({
+                return [...Array(60)].map((_, i) => ({
                     id: i,
                     size: Math.random() * 3 + 1,
                     left: Math.random() * 100,
@@ -97,134 +49,186 @@
                 }));
             }, []);
 
+            // Отслеживание позиции мыши для 3D параллакса
             useEffect(() => {
                 const handleMouseMove = (e) => {
                     setCursorPos({ x: e.clientX, y: e.clientY });
                     setMousePosition({
-                        x: (e.clientX / window.innerWidth - 0.5) * 30, 
-                        y: (e.clientY / window.innerHeight - 0.5) * 30,
+                        x: (e.clientX / window.innerWidth - 0.5) * 45, 
+                        y: (e.clientY / window.innerHeight - 0.5) * 45,
                     });
 
                     document.querySelectorAll('.glass-card').forEach((card) => {
                         const rect = card.getBoundingClientRect();
-                        card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-                        card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        card.style.setProperty('--mouse-x', `${x}px`);
+                        card.style.setProperty('--mouse-y', `${y}px`);
                     });
                 };
                 window.addEventListener('mousemove', handleMouseMove);
                 return () => window.removeEventListener('mousemove', handleMouseMove);
             }, []);
 
+            // Твой оригинальный контент
             const content = {
                 DE: {
                     slogan: "FUSION VON DIGITALER PRÄZISION UND HANDWERKLICHER INTUITION",
+                    bio: "„I'm an engineer, a dancer, an actor... rooted in Latin energy yet shaped by a global rhythm.“",
                     ghostTitle: "NEON GHOST",
                     ghostDesc: "Two ghosts started it all... Created through instinct rather than plan.",
                     portfolioTitle: "PORTFOLIO (Hauptwerke)",
-                    btn: "KÜNSTLER KONTAKTIEREN",
+                    btn: "KÜNSTLER KONTAKTIEREN / WERK BESTELLEN",
                     cards: [
-                        { id: 1, title: "DATENSTROM-FUSION", ref: "S. 6", img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=600" },
-                        { id: 2, title: "ECHTHEIT & GLITCH", ref: "S. 11", img: "https://images.unsplash.com/photo-1578301978693-85fa9c026f19?auto=format&fit=crop&q=80&w=600" },
-                        { id: 3, title: "ANALOGES ECHO", ref: "S. 15", img: "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?auto=format&fit=crop&q=80&w=600" },
-                        { id: 4, title: "METAMORPHOSE", ref: "S. 19", img: "https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&q=80&w=600" }
+                        { id: 1, title: "DATENSTROM-FUSION\nData Stream Fusion", ref: "S. 6", img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=600" },
+                        { id: 2, title: "ECHTHEIT & GLITCH\nAuthenticity & Glitch", ref: "S. 11", img: "https://images.unsplash.com/photo-1578301978693-85fa9c026f19?auto=format&fit=crop&q=80&w=600" },
+                        { id: 3, title: "ANALOGES ECHO\nAnalog Echo", ref: "S. 15", img: "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?auto=format&fit=crop&q=80&w=600" },
+                        { id: 4, title: "METAMORPHOSE\nMetamorphosis", ref: "S. 19", img: "https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&q=80&w=600" }
                     ]
                 },
                 EN: {
                     slogan: "FUSION OF DIGITAL PRECISION AND ARTISANAL INTUITION",
+                    bio: "“I'm an engineer, a dancer, an actor... rooted in Latin energy yet shaped by a global rhythm.”",
                     ghostTitle: "NEON GHOST",
                     ghostDesc: "Two ghosts started it all... Created through instinct rather than plan.",
                     portfolioTitle: "PORTFOLIO (Key Works)",
-                    btn: "CONTACT ARTIST",
+                    btn: "CONTACT ARTIST / COMMISSION WORK",
                     cards: [
-                        { id: 1, title: "DATA STREAM FUSION", ref: "P. 6", img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=600" },
-                        { id: 2, title: "AUTHENTICITY & GLITCH", ref: "P. 11", img: "https://images.unsplash.com/photo-1578301978693-85fa9c026f19?auto=format&fit=crop&q=80&w=600" },
-                        { id: 3, title: "ANALOG ECHO", ref: "P. 15", img: "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?auto=format&fit=crop&q=80&w=600" },
-                        { id: 4, title: "METAMORPHOSIS", ref: "P. 19", img: "https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&q=80&w=600" }
+                        { id: 1, title: "DATENSTROM-FUSION\nData Stream Fusion", ref: "P. 6", img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=600" },
+                        { id: 2, title: "ECHTHEIT & GLITCH\nAuthenticity & Glitch", ref: "P. 11", img: "https://images.unsplash.com/photo-1578301978693-85fa9c026f19?auto=format&fit=crop&q=80&w=600" },
+                        { id: 3, title: "ANALOGES ECHO\nAnalog Echo", ref: "P. 15", img: "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?auto=format&fit=crop&q=80&w=600" },
+                        { id: 4, title: "METAMORPHOSE\nMetamorphosis", ref: "P. 19", img: "https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&q=80&w=600" }
                     ]
                 }
             };
 
             const t = content[lang];
+            const mainImage = "https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&q=80&w=800";
+
+            const ImagePlaceholder = ({ src, className }) => (
+                <div className={`relative ${className}`}>
+                    <img src={src} alt="Artwork" className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 z-10 transition-opacity duration-300 group-hover:opacity-0 pointer-events-none">
+                        <span className="border border-white/40 px-3 py-2 text-[8px] md:text-[10px] tracking-widest bg-black/60 text-white/80 font-mono text-center backdrop-blur-sm">
+                            INSERT<br/>ARTWORK<br/>HERE
+                        </span>
+                    </div>
+                </div>
+            );
 
             return (
                 <div className="min-h-screen bg-[#050505] text-white relative flex flex-col justify-between overflow-hidden selection:bg-cyan-500/30">
+                    <style>{`
+                        :root { --bg-color: #050505; }
+                        body { background-color: var(--bg-color); color: #ffffff; font-family: 'Inter', sans-serif; overflow-x: hidden; margin: 0; cursor: default; }
+                        .font-montserrat { font-family: 'Montserrat', sans-serif; }
+                        .noise-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 50; opacity: 0.05; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); }
+                        @keyframes breathGlow { 0%, 100% { opacity: 0.5; transform: scale(0.95); filter: blur(50px); } 50% { opacity: 0.9; transform: scale(1.05); filter: blur(60px); } }
+                        .animate-breath { animation: breathGlow 5s ease-in-out infinite; }
+                        @keyframes driftMote { 0% { transform: translate(0, 0); opacity: 0; } 20% { opacity: 0.8; } 80% { opacity: 0.8; } 100% { transform: translate(var(--tx), var(--ty)); opacity: 0; } }
+                        .dust-mote { animation: driftMote linear infinite; background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(34,211,238,0.4) 50%, transparent 100%); }
+                        .preserve-3d { transform-style: preserve-3d; }
+                        .glass-card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.1), transparent 40%); opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2; }
+                        .glass-card:hover::before { opacity: 1; }
+                        .glitch-wrapper { position: relative; }
+                        .glitch-text { position: relative; z-index: 1; }
+                        .glitch-wrapper:hover .glitch-text::before, .glitch-wrapper:hover .glitch-text::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.8; }
+                        .glitch-wrapper:hover .glitch-text::before { left: 3px; text-shadow: -2px 0 #ff00c1; clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%); animation: glitch-anim 2s infinite linear alternate-reverse; }
+                        .glitch-wrapper:hover .glitch-text::after { left: -3px; text-shadow: -2px 0 #00fff9; clip-path: polygon(0 80%, 100% 20%, 100% 100%, 0 100%); animation: glitch-anim2 3s infinite linear alternate-reverse; }
+                        @keyframes glitch-anim { 0% { clip-path: polygon(0 2%, 100% 2%, 100% 5%, 0 5%); transform: translate(2px, -2px); } 100% { clip-path: polygon(0 44%, 100% 44%, 100% 44%, 0 44%); transform: translate(-1px, -1px); } }
+                    `}</style>
+
                     <div className="noise-bg" />
                     
-                    {/* Фон с параллаксом */}
-                    <div className="absolute inset-0 z-0 opacity-20 mix-blend-overlay" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=1920')", backgroundSize: 'cover' }} />
-                    <div className="absolute inset-0 z-0" style={{ background: 'radial-gradient(ellipse at top center, rgba(34, 211, 238, 0.15) 0%, #050505 80%)' }} />
+                    {/* СЛОИ ФОНА */}
+                    <div className="absolute inset-0 z-0 opacity-30 mix-blend-overlay pointer-events-none" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=1920')", backgroundSize: 'cover' }} />
+                    <div className="absolute inset-0 z-0 opacity-90 pointer-events-none" style={{ background: 'radial-gradient(ellipse at top center, rgba(160, 230, 255, 0.1) 0%, #050505 100%)' }} />
 
-                    {/* Световой курсор */}
-                    <div className="pointer-events-none fixed inset-0 z-[1] mix-blend-screen" 
-                         style={{ background: `radial-gradient(circle 600px at ${cursorPos.x}px ${cursorPos.y}px, rgba(34, 211, 238, 0.1), transparent 70%)` }} />
+                    <div className="pointer-events-none fixed inset-0 z-[1]" style={{ background: `radial-gradient(circle 800px at ${cursorPos.x}px ${cursorPos.y}px, rgba(34, 211, 238, 0.08), transparent 70%)` }} />
 
                     {/* Частицы */}
                     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-                        {dustMotes.map(m => (
-                            <div key={m.id} className="dust-mote absolute rounded-full bg-white/40"
-                                 style={{ '--tx': `${m.tx}px`, '--ty': `${m.ty}px`, width: m.size, height: m.size, left: `${m.left}%`, top: `${m.top}%`, animationDuration: `${m.duration}s`, animationDelay: `${m.delay}s` }} />
+                        {dustMotes.map((m) => (
+                            <div key={m.id} className="dust-mote absolute rounded-full" style={{ '--tx': `${m.tx}px`, '--ty': `${m.ty}px`, width: `${m.size}px`, height: `${m.size}px`, left: `${m.left}%`, top: `${m.top}%`, animationDuration: `${m.duration}s`, animationDelay: `${m.delay}s` }} />
                         ))}
                     </div>
 
-                    {/* Header */}
+                    {/* HEADER */}
                     <header className="relative z-20 flex justify-between items-center px-8 py-6">
-                        <div className="flex items-center gap-4 group cursor-pointer">
-                            <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 overflow-hidden backdrop-blur-md group-hover:border-cyan-400/50 transition-all shadow-2xl">
+                        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-4 group">
+                            <div className="relative w-14 h-14 rounded-xl bg-black/20 border border-white/10 overflow-hidden backdrop-blur-md group-hover:border-cyan-400/50 transition-all">
                                 <img src="logo.jpg" alt="Logo" className="w-full h-full object-cover" onError={(e) => e.target.src='https://via.placeholder.com/150'} />
                             </div>
-                            <div className="flex flex-col font-montserrat">
-                                <span className="font-black text-xl tracking-[0.15em] leading-none">JOSE</span>
-                                <span className="text-cyan-400 font-light text-lg tracking-[0.2em] mt-1 opacity-80">SANCHEZ</span>
+                            <div className="flex flex-col">
+                                <span className="font-montserrat font-black text-xl tracking-[0.15em] text-white">JOSE</span>
+                                <span className="font-montserrat font-light text-lg tracking-[0.2em] text-cyan-400 opacity-80">SANCHEZ</span>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-4 border border-white/10 rounded-full px-5 py-2 backdrop-blur-2xl bg-white/[0.03]">
-                            <button onClick={() => setLang('DE')} className={`text-sm font-bold ${lang === 'DE' ? 'text-white' : 'text-white/30'}`}>DE</button>
-                            <span className="text-white/10">|</span>
-                            <button onClick={() => setLang('EN')} className={`text-sm font-bold ${lang === 'EN' ? 'text-white' : 'text-white/30'}`}>EN</button>
-                        </div>
+                        </motion.div>
+
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-4 border border-white/10 rounded-full px-5 py-2 backdrop-blur-2xl bg-white/[0.03]">
+                            <GlobeIcon />
+                            <button onClick={() => setLang('DE')} className={`text-sm font-bold ${lang === 'DE' ? 'text-white' : 'text-white/40'}`}>DE</button>
+                            <span className="text-white/20">|</span>
+                            <button onClick={() => setLang('EN')} className={`text-sm font-bold ${lang === 'EN' ? 'text-white' : 'text-white/40'}`}>EN</button>
+                        </motion.div>
                     </header>
 
-                    {/* Main Content */}
-                    <main className="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-center gap-12 px-8 lg:px-20 py-10 preserve-3d">
-                        <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} className="w-full lg:w-1/2 space-y-6">
-                            <div className="glitch-wrapper cursor-default">
-                                <h1 data-text="JOSE SANCHEZ" className="glitch-text font-montserrat font-black text-7xl xl:text-9xl leading-[0.85] tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-500">
+                    {/* MAIN */}
+                    <main className="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-center gap-12 px-8 lg:px-16 py-10 preserve-3d">
+                        <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} className="w-full lg:w-1/3 flex flex-col gap-6 relative z-20">
+                            <div className="glitch-wrapper w-fit" onMouseEnter={() => setIsHoveringTitle(true)} onMouseLeave={() => setIsHoveringTitle(false)}>
+                                <h1 data-text="JOSE SANCHEZ" className={`glitch-text font-montserrat font-black text-6xl xl:text-8xl leading-[0.9] tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400 transition-all ${isHoveringTitle ? 'scale-[1.02]' : ''}`}>
                                     JOSE<br/>SANCHEZ
                                 </h1>
                             </div>
-                            <h2 className="font-montserrat font-bold text-lg text-cyan-300 tracking-[0.2em] uppercase leading-tight drop-shadow-2xl max-w-sm">
-                                {t.slogan}
-                            </h2>
-                            <button className="px-10 py-4 rounded-full font-montserrat font-bold text-[10px] tracking-[0.4em] uppercase border border-white/20 bg-white/5 backdrop-blur-md hover:bg-cyan-500/10 hover:border-cyan-400 transition-all shadow-xl">
+                            
+                            <AnimatePresence mode="wait">
+                                <motion.div key={lang} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="mt-2 space-y-2">
+                                    <h2 className="font-montserrat font-bold text-lg xl:text-xl text-cyan-300 tracking-widest uppercase leading-snug">{t.slogan}</h2>
+                                    <p className="font-inter font-light text-[#e0d6cd]/60 italic text-base border-l border-cyan-400/50 pl-4 py-1">{t.bio}</p>
+                                </motion.div>
+                            </AnimatePresence>
+
+                            <motion.button whileHover={{ scale: 1.05 }} className="relative px-6 py-4 rounded-full font-montserrat font-bold text-[10px] tracking-widest uppercase text-[#e0d6cd] border border-white/20 bg-white/5 backdrop-blur-md overflow-hidden hover:border-cyan-400 hover:text-white">
                                 {t.btn}
-                            </button>
+                            </motion.button>
                         </motion.div>
 
                         {/* 3D Canvas */}
-                        <motion.div 
-                            style={{ rotateY: mousePosition.x, rotateX: -mousePosition.y }}
-                            className="relative w-full max-w-[380px] aspect-[4/5] preserve-3d group cursor-pointer"
-                        >
-                            <div className="absolute inset-[-20px] bg-cyan-500/30 animate-breath rounded-full blur-[80px]" />
-                            <div className="absolute inset-0 bg-black border border-white/20 overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.8)]">
-                                <img src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800" className="w-full h-full object-cover opacity-80" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent p-8 flex flex-col justify-end">
-                                    <h3 className="font-montserrat font-black text-4xl text-cyan-300 mb-2 uppercase tracking-tighter">{t.ghostTitle}</h3>
-                                    <p className="text-sm italic text-white/70">"{t.ghostDesc}"</p>
+                        <div className="w-full lg:w-1/3 flex justify-center perspective-[2000px] z-10 preserve-3d">
+                            <motion.div animate={{ rotateY: mousePosition.x, rotateX: -mousePosition.y }} transition={{ type: 'spring', stiffness: 80, damping: 30 }} className="relative w-full max-w-[340px] aspect-[4/5] preserve-3d">
+                                <div className="absolute inset-[-15px] bg-cyan-500/40 animate-breath rounded-sm preserve-3d" style={{ transform: 'translateZ(-20px)' }} />
+                                <div className="absolute inset-0 bg-[#0a0a0a] border border-white/20 overflow-hidden preserve-3d shadow-2xl">
+                                    <ImagePlaceholder src={mainImage} className="w-full h-full" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex flex-col justify-end p-8">
+                                        <h3 className="font-montserrat font-black text-4xl tracking-widest text-cyan-300 mb-3">{t.ghostTitle}</h3>
+                                        <p className="font-inter text-sm text-white/90 italic font-light leading-relaxed">"{t.ghostDesc}"</p>
+                                    </div>
                                 </div>
-                            </div>
+                            </motion.div>
+                        </div>
+
+                        {/* Cards */}
+                        <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} className="w-full lg:w-1/3 grid grid-cols-2 gap-4 relative z-20">
+                            {t.cards.map((card, index) => (
+                                <motion.div key={card.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 + (index * 0.1) }} className="glass-card group relative aspect-square rounded-2xl overflow-hidden cursor-pointer border border-white/20 bg-white/[0.02] backdrop-blur-3xl transition-all hover:-translate-y-2">
+                                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <ImagePlaceholder src={card.img} className="w-full h-full grayscale group-hover:grayscale-0" />
+                                    </div>
+                                    <div className="relative z-20 h-full flex flex-col justify-end p-4 bg-gradient-to-t from-black/90 to-transparent">
+                                        <span className="text-[9px] text-cyan-300/80 font-mono mb-2 uppercase tracking-widest">Ref {card.ref}</span>
+                                        <h4 className="font-montserrat font-bold text-xs leading-snug text-white/90 group-hover:text-cyan-100">{card.title}</h4>
+                                    </div>
+                                </motion.div>
+                            ))}
                         </motion.div>
                     </main>
 
-                    {/* Footer Cards */}
-                    <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-4 px-8 pb-12">
-                        {t.cards.map((card) => (
-                            <div key={card.id} className="glass-card relative p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl transition-all hover:-translate-y-2">
-                                <span className="text-[10px] text-cyan-400 font-mono tracking-widest opacity-60">REF {card.ref}</span>
-                                <h4 className="font-montserrat font-bold text-xs mt-2 uppercase tracking-wider text-white/90">{card.title}</h4>
-                            </div>
-                        ))}
-                    </div>
+                    <footer className="relative z-20 w-full flex justify-center pb-8 opacity-50">
+                        <div className="flex flex-col items-center gap-2">
+                            <span className="font-inter text-[10px] tracking-[0.2em] uppercase">{lang === 'DE' ? "Nach unten scrollen" : "Scroll down"}</span>
+                        </div>
+                    </footer>
                 </div>
             );
         };
