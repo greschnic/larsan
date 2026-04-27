@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOSE SANCHEZ | Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const { motion, AnimatePresence } = window.framerMotion;
+
+        const App = () => {
+            const [lang, setLang] = useState('DE');
+            const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+            const [cursorPos, setCursorPos] = useState({ x: -1000, y: -1000 });
+            const [isHoveringTitle, setIsHoveringTitle] = useState(false);
+
+            // Мемоизация пылинок для фона
+            const dustMotes = useMemo(() => {
+                return [...Array(60)].map((_, i) => ({
+                    id: i,
+                    size: Math.random() * 3 + 1,
+                    left: Math.random() * 100,
+                    top: Math.random() * 100,
+                    delay: Math.random() * 10,
+                    duration: Math.random() * 20 + 15,
+                    tx: (Math.random() - 0.5) * 100,
+                    ty: (Math.random() - 1) * 150,
+                }));
+            }, []);
+
+            useEffect(() => {
+                const handleMouseMove = (e) => {
+                    setCursorPos({ x: e.clientX, y: e.clientY });
+                    setMousePosition({
+                        x: (e.clientX / window.innerWidth - 0.5) * 45, 
+                        y: (e.clientY / window.innerHeight - 0.5) * 45,
+                    });
+
+                    document.querySelectorAll('.glass-card').forEach((card) => {
+                        const rect = card.getBoundingClientRect();
+                        card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+                        card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+                    });
+                };
+                window.addEventListener('mousemove', handleMouseMove);
+                return () => window.removeEventListener('mousemove', handleMouseMove);
+            }, []);
+
+            const content = {
+                DE: {
+                    slogan: "FUSION VON DIGITALER PRÄZISION UND HANDWERKLICHER INTUITION",
+                    btn: "KÜNSTLER KONTAKTIEREN",
+                    ghostTitle: "NEON GHOST",
+                    ghostDesc: "Two ghosts started it all...",
+                    portfolioTitle: "PORTFOLIO",
+                    cards: [
+                        { id: 1, title: "DATENSTROM-FUSION", ref: "S. 6", img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600" },
+                        { id: 2, title: "ECHTHEIT & GLITCH", ref: "S. 11", img: "https://images.unsplash.com/photo-1578301978693-85fa9c026f19?w=600" },
+                        { id: 3, title: "ANALOGES ECHO", ref: "S. 15", img: "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?w=600" },
+                        { id: 4, title: "METAMORPHOSE", ref: "S. 19", img: "https://images.unsplash.com/photo-1536924940846-227afb31e2a5?w=600" }
+                    ]
+                },
+                EN: {
+                    slogan: "FUSION OF DIGITAL PRECISION AND ARTISANAL INTUITION",
+                    btn: "CONTACT ARTIST",
+                    ghostTitle: "NEON GHOST",
+                    ghostDesc: "Two ghosts started it all...",
+                    portfolioTitle: "PORTFOLIO",
+                    cards: [
+                        { id: 1, title: "DATA STREAM FUSION", ref: "P. 6", img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600" },
+                        { id: 2, title: "AUTHENTICITY & GLITCH", ref: "P. 11", img: "https://images.unsplash.com/photo-1578301978693-85fa9c026f19?w=600" },
+                        { id: 3, title: "ANALOG ECHO", ref: "P. 15", img: "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?w=600" },
+                        { id: 4, title: "METAMORPHOSIS", ref: "P. 19", img: "https://images.unsplash.com/photo-1536924940846-227afb31e2a5?w=600" }
+                    ]
+                }
+            };
+
+            const t = content[lang];
+
+            return (
+                <div className="min-h-screen bg-[#050505] text-white relative flex flex-col justify-between overflow-hidden font-sans">
+                    <style>{`
+                        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700;900&display=swap');
+                        .font-montserrat { font-family: 'Montserrat', sans-serif; }
+                        .noise-bg {
+                            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                            pointer-events: none; z-index: 50; opacity: 0.05;
+                            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+                        }
+                        @keyframes drift {
+                            0% { transform: translate(0,0); opacity: 0; }
+                            50% { opacity: 0.8; }
+                            100% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
+                        }
+                        .dust-mote { animation: drift linear infinite; background: white; }
+                        .glass-card::before {
+                            content: ""; position: absolute; inset: 0;
+                            background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.15), transparent 40%);
+                            opacity: 0; transition: opacity 0.3s;
+                        }
+                        .glass-card:hover::before { opacity: 1; }
+                    `}</style>
+
+                    <div className="noise-bg" />
+                    
+                    {/* Фон */}
+                    <div className="absolute inset-0 z-0 opacity-20" style={{backgroundImage: "url('https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=1920')", backgroundSize: 'cover'}} />
+                    <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-[#050505]/80 to-[#050505]" />
+
+                    {/* Пылинки */}
+                    <div className="absolute inset-0 pointer-events-none">
+                        {dustMotes.map(m => (
+                            <div key={m.id} className="dust-mote absolute rounded-full opacity-0" 
+                                style={{
+                                    '--tx': `${m.tx}px`, '--ty': `${m.ty}px`,
+                                    width: m.size, height: m.size, left: `${m.left}%`, top: `${m.top}%`,
+                                    animationDuration: `${m.duration}s`, animationDelay: `${m.delay}s`
+                                }} 
+                            />
+                        ))}
+                    </div>
+
+                    {/* Header */}
+                    <header className="relative z-20 flex justify-between items-center px-10 py-8">
+                        <div className="flex items-center gap-4 group">
+                            <div className="w-12 h-12 rounded-lg bg-white/10 border border-white/20 overflow-hidden">
+                                <img src="logo.jpg" className="w-full h-full object-cover" onError={(e) => e.target.src='https://via.placeholder.com/150'} />
+                            </div>
+                            <div className="font-montserrat leading-none">
+                                <div className="font-black text-xl tracking-tighter">JOSE</div>
+                                <div className="text-cyan-400 text-lg font-light tracking-[0.2em]">SANCHEZ</div>
+                            </div>
+                        </div>
+                        <div className="flex gap-4 border border-white/10 rounded-full px-4 py-2 backdrop-blur-md bg-white/5 text-xs font-bold">
+                            <button onClick={() => setLang('DE')} className={lang === 'DE' ? 'text-cyan-400' : 'opacity-40'}>DE</button>
+                            <button onClick={() => setLang('EN')} className={lang === 'EN' ? 'text-cyan-400' : 'opacity-40'}>EN</button>
+                        </div>
+                    </header>
+
+                    {/* Main */}
+                    <main className="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-around px-10">
+                        <div className="max-w-md">
+                            <h1 className="font-montserrat font-black text-7xl lg:text-8xl leading-none tracking-tighter mb-6">
+                                JOSE<br/>SANCHEZ
+                            </h1>
+                            <p className="text-cyan-300 font-montserrat font-bold tracking-widest uppercase mb-8">
+                                {t.slogan}
+                            </p>
+                            <button className="px-8 py-4 border border-white/20 rounded-full text-[10px] tracking-[0.3em] uppercase hover:bg-cyan-400 hover:text-black transition-all">
+                                {t.btn}
+                            </button>
+                        </div>
+
+                        {/* 3D Canvas */}
+                        <motion.div 
+                            style={{ rotateY: mousePosition.x, rotateX: -mousePosition.y, transformStyle: 'preserve-3d' }}
+                            className="relative w-72 h-96 mt-12 lg:mt-0"
+                        >
+                            <div className="absolute inset-0 bg-cyan-500/20 blur-3xl animate-pulse" />
+                            <div className="relative h-full w-full border border-white/30 bg-black overflow-hidden shadow-2xl">
+                                <img src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800" className="w-full h-full object-cover opacity-80" />
+                                <div className="absolute bottom-0 left-0 p-6 bg-gradient-to-t from-black to-transparent w-full">
+                                    <div className="text-cyan-300 font-black text-2xl uppercase">{t.ghostTitle}</div>
+                                    <div className="text-[10px] opacity-60 italic">"{t.ghostDesc}"</div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </main>
+
+                    <footer className="p-10 text-center opacity-20 text-[10px] tracking-widest uppercase">
+                        © 2026 Jose Sanchez | Global Portfolio
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
